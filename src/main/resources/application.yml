@@ -1,0 +1,10 @@
+spring:
+  neo4j:
+    authentication:
+      username: neo4j
+      password: root9095Java
+    uri: bolt://neo4j:7687
+  application:
+    name: Movie-Service
+server:
+  port: 8971

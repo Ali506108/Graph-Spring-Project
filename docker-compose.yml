@@ -1,0 +1,39 @@
+services:
+  neo4j:
+    image: neo4j:5.23
+    container_name: neo4j
+    restart: always
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    environment:
+      NEO4J_AUTH: neo4j/root9095Java
+      NEO4J_dbms_memory_heap_initial__size: 512M
+      NEO4J_dbms_memory_heap_max__size: 1G
+      NEO4J_dbms_memory_pagecache_size: 512M
+    volumes:
+      - ./neo4j/data:/data
+      - ./neo4j/logs:/logs
+      - ./neo4j/import:/var/lib/neo4j/import
+      - ./neo4j/plugins:/plugins
+    networks:
+      - graphnet
+
+  app:
+    build: .
+    container_name: graph-app
+    restart: always
+    depends_on:
+      - neo4j
+    ports:
+      - "8971:8971"
+    environment:
+      SPRING_DATA_NEO4J_URI: bolt://neo4j:7687
+      SPRING_DATA_NEO4J_USERNAME: neo4j
+      SPRING_DATA_NEO4J_PASSWORD: root9095Java
+    networks:
+      - graphnet
+
+networks:
+  graphnet:
+    driver: bridge
