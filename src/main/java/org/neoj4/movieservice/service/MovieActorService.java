@@ -84,7 +84,6 @@ public class MovieActorService {
 
 
 
-
     public CompletableFuture<Movie> updateMovie(Movie movie , Long id) {
         return CompletableFuture.supplyAsync(() -> repository.findById(id).orElseThrow() ,  movieExecutor)
                 .thenApply(mov -> repository.save(movie))

@@ -1,5 +1,8 @@
 package org.neoj4.movieservice.api;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.neoj4.movieservice.model.Actor;
@@ -16,11 +19,17 @@ import java.util.concurrent.CompletableFuture;
 @RestController
 @RequestMapping("/api/v1")
 @RequiredArgsConstructor
+@Schema(description = "that's our api for working with our db")
 public class ApiController {
 
     private final MovieActorService service;
 
 
+    @Schema(description = "create our movie")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201" , description = "created") ,
+            @ApiResponse(responseCode = "400" , description = "valid error")
+    })
     @PostMapping( "/movie")
     @ResponseStatus(HttpStatus.CREATED)
     public CompletableFuture<Movie> save(@RequestBody Movie movie) {
