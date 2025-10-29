@@ -2,9 +2,12 @@ package org.neoj4.movieservice.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.neoj4.movieservice.mapper.ActorMapper;
+import org.neoj4.movieservice.mapper.MovieMapper;
 import org.neoj4.movieservice.model.ActedIn;
 import org.neoj4.movieservice.model.Actor;
 import org.neoj4.movieservice.model.Movie;
+import org.neoj4.movieservice.model.dto.*;
 import org.neoj4.movieservice.repo.ActorRepository;
 import org.neoj4.movieservice.repo.MovieRepository;
 import org.springframework.stereotype.Service;
@@ -19,34 +22,47 @@ import java.util.concurrent.Executor;
 @RequiredArgsConstructor
 public class MovieActorService {
 
+
     private final MovieRepository repository;
     private final ActorRepository actorRepository;
     private final Executor movieExecutor;
+    private final MovieMapper movieMapper;
+    private final ActorMapper actorMapper;
 
+    /*
+    *
+    *
+    * TODO : try to integrate Dto's to our program  
+     */
 
+    public CompletableFuture<ApiResponse<MovieDto>> createMovie(CreateMovie movie ){
+        return CompletableFuture.supplyAsync(() -> {
+            Movie entityMovie = movieMapper.toEntity(movie);
+            Movie repoSaved = repository.save(entityMovie);
 
+            log.info("Created Movie {} {}" , repoSaved.getId() , repoSaved.getTitle());
 
-    public CompletableFuture<Movie> createMovie(Movie movie ){
-        return CompletableFuture.supplyAsync(() -> repository.save(movie) , movieExecutor)
-                .thenApply(movies -> {
-                    log.info("Created movie: {}", movies);
-                    return movies;
-                }).exceptionally(ex -> {
-                    log.error("Error while creating movie", ex);
-                    throw new CompletionException(ex);
-                });
+            return ApiResponse.success(movieMapper.toDto(repoSaved));
+        } , movieExecutor).exceptionally(ex -> {
+            log.error("Error creating Movie {}" , ex.getMessage());
+            throw new CompletionException(ex);
+        });
     }
 
-    public CompletableFuture<Actor> createActor(Actor actor){
-        return CompletableFuture.supplyAsync(() -> actorRepository.save(actor) , movieExecutor)
-                .thenApply(mov -> {
-                    log.info("Created actor: {}", mov);
-                    return mov;
-                })
-                .exceptionally(ex -> {
-                    log.error("Error creating actor", ex);
-                    throw new CompletionException(ex);
-                });
+    public CompletableFuture<ApiResponse<ActorDto>> createActor(CreateActor actor){
+        return CompletableFuture.supplyAsync(() -> {
+            Actor map = actorMapper.toEntity(actor);
+            Actor saved = actorRepository.save(map);
+            ActorDto actorDto = actorMapper.toDto(saved);
+
+            log.info("Actor created {} {}" , saved.getId() , saved.getFullName());
+
+            return ApiResponse.success(actorMapper.toDto(saved));
+
+        }, movieExecutor).exceptionally(ex ->{
+            log.error("Error creating Actor {}" , ex.getMessage());
+            throw new CompletionException(ex);
+        });
     }
 
 
@@ -82,47 +98,48 @@ public class MovieActorService {
 
 
 
-
-
-    public CompletableFuture<Movie> updateMovie(Movie movie , Long id) {
-        return CompletableFuture.supplyAsync(() -> repository.findById(id).orElseThrow() ,  movieExecutor)
-                .thenApply(mov -> repository.save(movie))
-                .thenApply(mov -> {
-                    log.info("Updated movie: {}", mov);
-                    return mov;
-                })
-                .exceptionally(ex ->{
-                    log.error("Error updating movie", ex);
-                    throw new CompletionException(ex);
-                });
+    public CompletableFuture<ApiResponse<MovieDto>> getMovieById(Long id) {
+        return CompletableFuture.supplyAsync(() -> {
+            Movie movie = repository.findById(id).orElseThrow(() -> new RuntimeException("Movie not founded"));
+            MovieDto movieDto = movieMapper.toDto(movie);
+            log.info("Movie {}" , movie.getId());
+            return ApiResponse.success(movieDto);
+        } ,  movieExecutor).exceptionally(ex -> {
+            log.error("Error getting Movie {}" , ex.getMessage());
+            throw new CompletionException(ex);
+        });
     }
 
+    public CompletableFuture<ApiResponse<ActorDto>> getActorById(Long id) {
+        return CompletableFuture.supplyAsync(() -> {
+            Actor actor = actorRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Actor not found"));
 
-    public CompletableFuture<Movie> getMovieById(Long id) {
-        return CompletableFuture.supplyAsync(() -> repository.findById(id).orElseThrow() , movieExecutor)
-                .thenApply(mov -> {
-                    log.info("Retrieved movie: {}", mov);
-                    return mov;
-                }).
-                exceptionally(ex -> {
-                    log.error("Error retrieving movie", ex);
-                    throw new CompletionException(ex);
-                });
-    }
+            ActorDto dto = actorMapper.toDto(actor);
+            log.info("founded Actor {} " , actor.getId());
 
-    public CompletableFuture<Actor> getActorById(Long id) {
-        return CompletableFuture.supplyAsync(() -> actorRepository.findById(id).orElseThrow()
-                , movieExecutor);
+            return ApiResponse.success(dto);
+        } , movieExecutor);
     }
 
 
 
-    public List<Movie> getAllMovies() {
-        return repository.findAll();
+    public ApiResponse<List<MovieDto>> getAllMovies() {
+        List<MovieDto> founded = repository.findAll()
+                .stream()
+                .map(movieMapper::toDto)
+                .toList();
+        return ApiResponse.success(founded);
     }
 
-    public List<Actor> getAllActors() {
-        return actorRepository.findAll();
+    public ApiResponse<List<ActorDto>> getAllActors() {
+        List<ActorDto> founded = actorRepository.findAll()
+                .stream()
+                .map(actorMapper::toDto)
+                .toList();
+
+        return ApiResponse.success(founded);
+
     }
 
 

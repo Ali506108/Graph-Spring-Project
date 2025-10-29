@@ -6,7 +6,7 @@ import java.util.HashSet;
 
 public record ActorDto(
         Long id ,
-        String FullName ,
+        String fullName ,
         int age ,
         HashSet<ActedIn> actedIns
 ) {
