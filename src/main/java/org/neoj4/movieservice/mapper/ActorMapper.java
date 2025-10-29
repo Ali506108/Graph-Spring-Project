@@ -11,8 +11,6 @@ public interface ActorMapper {
 
 
 
-    @Mapping(target = "id" , ignore = true)
-    @Mapping(target = "actedIns" , ignore = true)
     ActorDto toDto( Actor actor );
 
     @Mapping(target = "id", ignore = true)
