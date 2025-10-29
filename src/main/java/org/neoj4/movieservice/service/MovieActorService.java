@@ -43,10 +43,7 @@ public class MovieActorService {
             log.info("Created Movie {} {}" , repoSaved.getId() , repoSaved.getTitle());
 
             return ApiResponse.success(movieMapper.toDto(repoSaved));
-        } , movieExecutor).exceptionally(ex -> {
-            log.error("Error creating Movie {}" , ex.getMessage());
-            throw new CompletionException(ex);
-        });
+        } , movieExecutor);
     }
 
     public CompletableFuture<ApiResponse<ActorDto>> createActor(CreateActor actor){
@@ -59,14 +56,11 @@ public class MovieActorService {
 
             return ApiResponse.success(actorMapper.toDto(saved));
 
-        }, movieExecutor).exceptionally(ex ->{
-            log.error("Error creating Actor {}" , ex.getMessage());
-            throw new CompletionException(ex);
-        });
+        }, movieExecutor);
     }
 
 
-    public CompletableFuture<Void> linkActorToMovie(Long movieId , Long actorId ,
+    public CompletableFuture<Void> linkActorToMovie(Long actorId , Long movieId,
                                                     String role , int year) {
 
         CompletableFuture<Actor> actorFuture = CompletableFuture.supplyAsync(() ->
@@ -90,9 +84,6 @@ public class MovieActorService {
 
             log.info("Linked actors to movies: {}", actor.getActedIns());
 
-        }).exceptionally(ex -> {
-            log.error("Error linking actors to movies", ex);
-            throw new CompletionException(ex);
         });
     }
 
@@ -104,10 +95,7 @@ public class MovieActorService {
             MovieDto movieDto = movieMapper.toDto(movie);
             log.info("Movie {}" , movie.getId());
             return ApiResponse.success(movieDto);
-        } ,  movieExecutor).exceptionally(ex -> {
-            log.error("Error getting Movie {}" , ex.getMessage());
-            throw new CompletionException(ex);
-        });
+        } ,  movieExecutor);
     }
 
     public CompletableFuture<ApiResponse<ActorDto>> getActorById(Long id) {

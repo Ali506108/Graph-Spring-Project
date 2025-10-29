@@ -5,8 +5,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.neoj4.movieservice.model.Actor;
-import org.neoj4.movieservice.model.Movie;
 import org.neoj4.movieservice.model.dto.ActorDto;
 import org.neoj4.movieservice.model.dto.CreateActor;
 import org.neoj4.movieservice.model.dto.CreateMovie;
