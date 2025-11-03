@@ -6,5 +6,16 @@ spring:
     uri: bolt://neo4j:7687
   application:
     name: Movie-Service
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
 server:
   port: 8971
+
+
+aws:
+  accessKeyId: ${AWS_ACCESS_KEY_ID}
+  region: ${AWS_REGION}
+  bucket: ${AWS_BUCKET}
+  secret: ${AWS_SECRET_ACCESS_KEY}

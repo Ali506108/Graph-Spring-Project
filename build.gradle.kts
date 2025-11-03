@@ -25,6 +25,10 @@ repositories {
 }
 
 dependencies {
+    // aws
+    implementation("com.amazonaws:aws-java-sdk-s3:1.12.793")
+
+    // our spring project
     implementation("org.springframework.boot:spring-boot-starter-data-neo4j")
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springdoc:springdoc-openapi-ui:1.7.0")
@@ -37,6 +41,8 @@ dependencies {
     annotationProcessor("org.mapstruct:mapstruct-processor:1.6.3")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    "developmentOnly"("org.springframework.boot:spring-boot-devtools")
+
 }
 
 tasks.withType<Test> {
