@@ -11,10 +11,11 @@ import org.neoj4.movieservice.model.dto.*;
 import org.neoj4.movieservice.repo.ActorRepository;
 import org.neoj4.movieservice.repo.MovieRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.InputStream;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
 import java.util.concurrent.Executor;
 
 @Slf4j
@@ -28,6 +29,7 @@ public class MovieActorService {
     private final Executor movieExecutor;
     private final MovieMapper movieMapper;
     private final ActorMapper actorMapper;
+    private final S3Service s3Service;
 
     /*
     *
@@ -35,17 +37,29 @@ public class MovieActorService {
     * TODO : try to integrate Dto's to our program  
      */
 
-    public CompletableFuture<ApiResponse<MovieDto>> createMovie(CreateMovie movie ){
+    public CompletableFuture<ApiResponse<MovieDto>> createMovie(CreateMovie movie , MultipartFile file ) {
         return CompletableFuture.supplyAsync(() -> {
             Movie entityMovie = movieMapper.toEntity(movie);
+            String fileUrl = s3Service.uploadFile(file);
+            entityMovie.setUrl(fileUrl);
             Movie repoSaved = repository.save(entityMovie);
 
-            log.info("Created Movie {} {}" , repoSaved.getId() , repoSaved.getTitle());
+            log.info("Created Movie {} {} {}" , repoSaved.getId() , repoSaved.getTitle() , repoSaved.getUrl());
 
             return ApiResponse.success(movieMapper.toDto(repoSaved));
         } , movieExecutor);
     }
 
+
+    public CompletableFuture<InputStream> downloadData(Long movieId) {
+        return CompletableFuture.supplyAsync(() -> {
+            log.info("Dowloading Movie {}" , movieId);
+            Movie findMovie = repository.findById(movieId).orElseThrow(() -> new RuntimeException("Movie Not Found"));
+
+            return s3Service.downloadFile(findMovie.getUrl());
+
+        }, movieExecutor);
+    }
     public CompletableFuture<ApiResponse<ActorDto>> createActor(CreateActor actor){
         return CompletableFuture.supplyAsync(() -> {
             Actor map = actorMapper.toEntity(actor);
@@ -54,7 +68,7 @@ public class MovieActorService {
 
             log.info("Actor created {} {}" , saved.getId() , saved.getFullName());
 
-            return ApiResponse.success(actorMapper.toDto(saved));
+            return ApiResponse.success(actorDto);
 
         }, movieExecutor);
     }
