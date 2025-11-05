@@ -39,4 +39,5 @@ out/
 neo4j/data/
 neo4j/logs/
 
-.env.env
+.env
+.env
